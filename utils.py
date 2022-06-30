@@ -37,6 +37,22 @@ def solve(X, y, alpha=0):
     w_hat = np.dot(X_t_X_inv, X_t_y)
     return w_hat
 
+def solve_predict_norm(X, y, alpha=0):
+    mean_Xs, sd_Xs = np.mean(X, axis=0), np.std(X, axis=0)
+    mean_y, sd_y = np.mean(y), np.std(y)
+    
+    # normalize
+    norm_Xs = (X - mean_Xs) / sd_Xs
+    norm_ys = (y - mean_y) / sd_y
+    
+    # solve
+    norm_w_hat = solve(norm_Xs, norm_ys, alpha)
+    norm_y_hat = np.dot(norm_Xs, norm_w_hat)
+    
+    # denormalize
+    y_hat = mean_y + sd_y * norm_y_hat
+    return y_hat, norm_w_hat
+
 
 # evaluation metrics
 def mse(gt, pred):
