@@ -56,10 +56,32 @@ def solve_predict_norm(X, y, alpha=0):
 
 # evaluation metrics
 def mse(gt, pred):
-    return np.sum((gt - pred) ** 2) / len(gt)
+    return np.mean((gt - pred) ** 2)
 
 def mae(gt, pred):
-    return np.sum(np.abs(gt - pred)) / len(gt)
+    return np.mean(abs(gt - pred))
 
 def r2(gt, pred):
     return 1 - mse(gt, pred) / np.var(gt)
+
+def gini(gt, pred):
+    gt_0 = gt - min(gt)
+    
+    sort_idxs = np.argsort(pred)
+    lorenz_pred = np.cumsum(gt_0[sort_idxs]) / sum(gt_0)
+    lorenz_gt = np.cumsum(sorted(gt_0)) / sum(gt_0)
+    
+    middle_line = np.arange(len(gt)) / (len(gt) - 1)
+    
+    real_gini = sum(middle_line - lorenz_pred)
+    ideal_gini = sum(middle_line - lorenz_gt)
+    return real_gini / ideal_gini
+    
+def ks(gt, pred):
+    corr_gt = (gt - min(gt)) / (max(gt) - min(gt))
+    
+    sort_idxs = np.argsort(pred)
+    cdf1 = np.cumsum(corr_gt[sort_idxs]) / sum(corr_gt)
+    cdf0 = np.cumsum(1-corr_gt[sort_idxs]) / sum(1-corr_gt)
+    ks = np.max(np.abs(cdf0 - cdf1))
+    return ks
